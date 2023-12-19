@@ -82,19 +82,29 @@ impl UserRepository {
     pub async fn create(c: &mut AsyncPgConnection, new_user: NewUser, role_codes: Vec<String>) -> QueryResult<User>{
         let user = diesel::insert_into(users::table)
             .values(new_user)
-            .get_result(c)
+            .get_result::<User>(c)
             .await?;
 
             for role_code in role_codes {
-                if let Ok(role) = RoleRepository::find_by_code(c, role_code.to_owned()).await {
-                    let new_user_role = NewUserRole { user_id: user.id, role_id: role.id };
-                } else {
-                    let new_role = NewRole { code: role_code.to_owned(), name: role_code.to_owned() };
 
-                    let role = RoleRepository::create(c, new_role).await?;
-                    let new_user_role = NewUserRole { user_id: user.id, role_id: role.id };
+                let new_user_role = {
 
+                    if let Ok(role) = RoleRepository::find_by_code(c, role_code.to_owned()).await {
+                        NewUserRole { user_id: user.id, role_id: role.id }
+                    } else {
+                        let new_role = NewRole { code: role_code.to_owned(), name: role_code.to_owned() };
+    
+                        let role = RoleRepository::create(c, new_role).await?;
+                        NewUserRole { user_id: user.id, role_id: role.id }
+    
+                    }
+    
                 }
+
+                diesel::insert_into(users_roles::table)
+                    .values(new_user_role)
+                    .get_result::<User>(c)
+                    .await?;
             }
 
         Ok(user)
