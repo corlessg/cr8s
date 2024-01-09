@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use diesel_async::{AsyncPgConnection, AsyncConnection};
 
-use crate::{models::{NewUser, RoleCode}, repositories::{UserRepository, RoleRepository}, auth::hash_password};
+use crate::{models::{NewUser, RoleCode}, repositories::{UserRepository, RoleRepository, CrateRepository}, auth::hash_password};
 
 async fn load_db_connection() -> AsyncPgConnection {
     let database_url = std::env::var("DATABASE_URL")
@@ -45,4 +45,10 @@ pub async fn delete_user(id: i32) {
     UserRepository::delete(&mut c, id).await.unwrap();
 
 
+}
+
+pub async fn digest_send(email: String, hours_since: i32) {
+    let mut c = load_db_connection().await;
+
+    let crates = CrateRepository::find_since(&mut c, hours_since).await.unwrap();
 }

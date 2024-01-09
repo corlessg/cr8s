@@ -143,9 +143,9 @@ impl FromSql<Text, Pg> for RoleCode {
 impl ToSql<Text, Pg> for RoleCode {
     fn to_sql<'b>(&'b self, out: &mut diesel::serialize::Output<'b, '_, Pg>) -> diesel::serialize::Result {
         match self {
-            RoleCode::Admin => out.write_all(b"admin"),
-            RoleCode::Editor => out.write_all(b"editor"),
-            RoleCode::Viewer => out.write_all(b"viewer"),
+            RoleCode::Admin => out.write_all(b"admin")?,
+            RoleCode::Editor => out.write_all(b"editor")?,
+            RoleCode::Viewer => out.write_all(b"viewer")?,
         };
         Ok(diesel::serialize::IsNull::No)
     }

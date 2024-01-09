@@ -22,7 +22,6 @@ fn test_login() {
     println!("{:?}",output);
 
     let client = Client::new();
-    let rustacean = common::create_test_rustacean(&client);
 
     let response = client.post(format!("{}/login",common::APP_HOST))
         .json(&json!({

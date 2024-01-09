@@ -1,3 +1,5 @@
+use diesel::dsl::IntervalDsl;
+use diesel::dsl::now;
 use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection,RunQueryDsl};
 
@@ -13,9 +15,9 @@ impl RustaceanRepository{
     }
 
     pub async fn find_multiple(c: &mut AsyncPgConnection, limit: i64) -> QueryResult<Vec<Rustacean>> {
-        rustaceans::table.load(c).await
+        rustaceans::table.limit(limit).load(c).await
     }
-
+    
     pub async fn create(c: &mut AsyncPgConnection, new_rustacean: NewRustacean) -> QueryResult<Rustacean>{
         diesel::insert_into(rustaceans::table)
             .values(new_rustacean)
@@ -47,7 +49,13 @@ impl CrateRepository {
     }
 
     pub async fn find_multiple(c: &mut AsyncPgConnection, limit: i64) -> QueryResult<Vec<Crate>> {
-        crates::table.get_results(c).await
+        crates::table.limit(limit).get_results(c).await
+    }
+
+    pub async fn find_since(c: &mut AsyncPgConnection, hours_since: i32) -> QueryResult<Vec<Crate>> {
+        crates::table.filter(
+            crates::created_at.ge(now - hours_since.hours())
+        )
     }
 
     pub async fn create(c: &mut AsyncPgConnection, new_crate: NewCrate) -> QueryResult<Crate>{
