@@ -1,8 +1,16 @@
 use std::str::FromStr;
 
+use chrono::{Utc, Datelike};
 use diesel_async::{AsyncPgConnection, AsyncConnection};
+use lettre::message::{MessageBuilder, header::ContentType};
+use tera::{Tera, Context};
 
 use crate::{models::{NewUser, RoleCode}, repositories::{UserRepository, RoleRepository, CrateRepository}, auth::hash_password};
+
+fn load_template_engine() -> Tera {
+    Tera::new("templates/**/*.html")
+        .expect("Cannot load tempalte engine")
+}
 
 async fn load_db_connection() -> AsyncPgConnection {
     let database_url = std::env::var("DATABASE_URL")
@@ -49,6 +57,23 @@ pub async fn delete_user(id: i32) {
 
 pub async fn digest_send(email: String, hours_since: i32) {
     let mut c = load_db_connection().await;
+    let tera = load_template_engine();
 
     let crates = CrateRepository::find_since(&mut c, hours_since).await.unwrap();
+
+    if crates.len() > 0 {
+        let year = Utc::now().year();
+        let context = Context::new();
+        context.insert("crates", &crates);
+        context.insert("year", &year);
+
+        let html_body = tera.render("email/digest.html", &context).unwrap();
+        let message = MessageBuilder::new()
+            .subject("Cr8s Digest")
+            .from("Cr8s <noreply@cr8s.com>".parse().unwrap())
+            .to(email.parse().unwrap())
+            .header(ContentType::TEXT_HTML)
+            .body(html_body)
+            .unwrap();
+    }
 }
