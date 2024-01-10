@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use chrono::{Utc, Datelike};
 use diesel_async::{AsyncPgConnection, AsyncConnection};
-use lettre::message::{MessageBuilder, header::ContentType};
+use lettre::{message::{MessageBuilder, header::ContentType}, SmtpTransport, transport::smtp::authentication::Credentials, Transport};
 use tera::{Tera, Context};
 
 use crate::{models::{NewUser, RoleCode}, repositories::{UserRepository, RoleRepository, CrateRepository}, auth::hash_password};
@@ -62,8 +62,10 @@ pub async fn digest_send(email: String, hours_since: i32) {
     let crates = CrateRepository::find_since(&mut c, hours_since).await.unwrap();
 
     if crates.len() > 0 {
+
+        println!("Sending digest for {} crates",crates.len());
         let year = Utc::now().year();
-        let context = Context::new();
+        let mut context = Context::new();
         context.insert("crates", &crates);
         context.insert("year", &year);
 
@@ -75,5 +77,21 @@ pub async fn digest_send(email: String, hours_since: i32) {
             .header(ContentType::TEXT_HTML)
             .body(html_body)
             .unwrap();
+
+        let smtp_host = std::env::var("SMTP_HOST")
+            .expect("Cannot retrieve SMTP host from env");
+        let smtp_username = std::env::var("SMTP_USERNAME")
+            .expect("Cannot retrieve SMTP username from env");
+        let smtp_password = std::env::var("SMTP_PASSWORD")
+            .expect("Cannot retrieve SMTP password from env");
+
+
+        let credentials = Credentials::new(smtp_username,smtp_password);
+
+        let mailer = SmtpTransport::relay(&smtp_host)
+            .unwrap()
+            .credentials(credentials)
+            .build();
+        mailer.send(&message).unwrap();
     }
 }
