@@ -23,7 +23,7 @@ services:
           }
       - SMTP_HOST=smtp.gmail.com
       - SMTP_USERNAME=k0mbucha1992@gmail.com
-      - SMTP_PASSWORD=oebw rvhn wclh amqo
+      - SMTP_PASSWORD=
     ports:
       - 8000:8000
     volumes:
