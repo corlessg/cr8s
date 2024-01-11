@@ -5,7 +5,7 @@ use diesel_async::{AsyncPgConnection,RunQueryDsl};
 
 use crate::models::*;
 use crate::schema::*;
-use crate::schema::users_roles::role_id;
+// use crate::schema::users_roles::role_id;
 
 pub struct RustaceanRepository;
 
@@ -55,7 +55,7 @@ impl CrateRepository {
     pub async fn find_since(c: &mut AsyncPgConnection, hours_since: i32) -> QueryResult<Vec<Crate>> {
         crates::table.filter(
             crates::created_at.ge(now - hours_since.hours())
-        )
+        ).get_results(c).await
     }
 
     pub async fn create(c: &mut AsyncPgConnection, new_crate: NewCrate) -> QueryResult<Crate>{

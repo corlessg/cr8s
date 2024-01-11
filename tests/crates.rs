@@ -34,8 +34,8 @@ fn test_create_crate() {
         "created_at":a_crate["created_at"]
     }));
     
-    common::delete_test_crate(&client,a_crate);
-    common::delete_test_rustacean(&client, rustacean);
+    // common::delete_test_crate(&client,a_crate);
+    // common::delete_test_rustacean(&client, rustacean);
 }
 
 #[test]

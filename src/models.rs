@@ -4,7 +4,7 @@ use std::str::FromStr;
 use chrono::NaiveDateTime;
 use diesel::deserialize::{FromSqlRow, FromSql};
 use diesel::pg::{Pg, PgValue};
-use diesel::serialize::{ToSql, IsNull};
+use diesel::serialize::{ToSql};
 use diesel::{prelude::*, expression::AsExpression};
 use diesel::sql_types::Text;
 use crate::schema::*;

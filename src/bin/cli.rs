@@ -35,7 +35,7 @@ async fn main() {
         .subcommand(
             Command::new("digest-send")
                 .about("Send a digest with the latest crates via email")
-                .arg(Arg::new("email").require_equals(true))
+                .arg(Arg::new("email").required(true))
                 .arg(Arg::new("hours_since").required(true).value_parser(value_parser!(i32)))   
         )
         .get_matches();

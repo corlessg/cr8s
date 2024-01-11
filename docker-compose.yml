@@ -22,8 +22,8 @@ services:
           redis={url=redis://redis:6379}
           }
       - SMTP_HOST=smtp.gmail.com
-      - SMTP_USERNAME=
-      - SMTP_PASSWORD=
+      - SMTP_USERNAME=k0mbucha1992@gmail.com
+      - SMTP_PASSWORD=oebw rvhn wclh amqo
     ports:
       - 8000:8000
     volumes:
