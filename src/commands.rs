@@ -2,10 +2,9 @@ use std::str::FromStr;
 
 use chrono::{Utc, Datelike};
 use diesel_async::{AsyncPgConnection, AsyncConnection};
-use lettre::{message::{MessageBuilder, header::ContentType}, SmtpTransport, transport::smtp::authentication::Credentials, Transport};
 use tera::{Tera, Context};
 
-use crate::{models::{NewUser, RoleCode}, repositories::{UserRepository, RoleRepository, CrateRepository}, auth::hash_password};
+use crate::{models::{NewUser, RoleCode}, repositories::{UserRepository, RoleRepository, CrateRepository}, auth::hash_password, mail::HtmlMailer};
 
 fn load_template_engine() -> Tera {
     Tera::new("templates/**/*.html")
@@ -69,15 +68,6 @@ pub async fn digest_send(email: String, hours_since: i32) {
         context.insert("crates", &crates);
         context.insert("year", &year);
 
-        let html_body = tera.render("email/digest.html", &context).unwrap();
-        let message = MessageBuilder::new()
-            .subject("Cr8s Digest")
-            .from("Cr8s <noreply@cr8s.com>".parse().unwrap())
-            .to(email.parse().unwrap())
-            .header(ContentType::TEXT_HTML)
-            .body(html_body)
-            .unwrap();
-
         let smtp_host = std::env::var("SMTP_HOST")
             .expect("Cannot retrieve SMTP host from env");
         let smtp_username = std::env::var("SMTP_USERNAME")
@@ -86,12 +76,7 @@ pub async fn digest_send(email: String, hours_since: i32) {
             .expect("Cannot retrieve SMTP password from env");
 
 
-        let credentials = Credentials::new(smtp_username,smtp_password);
-
-        let mailer = SmtpTransport::relay(&smtp_host)
-            .unwrap()
-            .credentials(credentials)
-            .build();
-        mailer.send(&message).unwrap();
+        let mailer = HtmlMailer { template_engine: tera, smtp_host, smtp_username, smtp_password };
+        mailer.send(email, "email/digest.html",context).unwrap();
     }
 }
