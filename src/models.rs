@@ -59,7 +59,7 @@ pub struct User {
     pub created_at: NaiveDateTime
 }
 
-#[derive(Insertable)]docker
+#[derive(Insertable)]
 #[diesel(table_name=users)]
 pub struct NewUser {
     pub username: String,
