@@ -1,6 +1,5 @@
 use std::error::Error;
 
-use tera::Tera;
 use lettre::{message::{MessageBuilder, header::ContentType}, SmtpTransport, transport::smtp::{authentication::Credentials, response::Response}, Transport};
 use tera::{Tera, Context};
 
@@ -13,11 +12,11 @@ pub struct HtmlMailer {
 
 impl HtmlMailer {
 
-    pub fn send(self, to: String, template_name: &str, template_context: Context) -> Result<Response, Box<dyn Error>>{
+    pub fn send(self, to: String, subject: String, template_name: &str, template_context: Context) -> Result<Response, Box<dyn Error>>{
 
         let html_body = self.template_engine.render(template_name, &template_context)?;
         let message = MessageBuilder::new()
-            .subject("Cr8s Digest")
+            .subject(subject)
             .from("Cr8s <noreply@cr8s.com>".parse()?)
             .to(to.parse()?)
             .header(ContentType::TEXT_HTML)

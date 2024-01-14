@@ -54,7 +54,7 @@ pub async fn delete_user(id: i32) {
 
 }
 
-pub async fn digest_send(email: String, hours_since: i32) {
+pub async fn digest_send(email: String, subject: String, hours_since: i32) {
     let mut c = load_db_connection().await;
     let tera = load_template_engine();
 
@@ -77,6 +77,6 @@ pub async fn digest_send(email: String, hours_since: i32) {
 
 
         let mailer = HtmlMailer { template_engine: tera, smtp_host, smtp_username, smtp_password };
-        mailer.send(email, "email/digest.html",context).unwrap();
+        mailer.send(email, subject, "email/digest.html", context).unwrap();
     }
 }
